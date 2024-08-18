@@ -1,0 +1,64 @@
+{
+  "project_info": {
+    "project_number": "46115585123",
+    "project_id": "medibound-420121",
+    "storage_bucket": "medibound-420121.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46115585123:android:18f4eeda820e5236578c56",
+        "android_client_info": {
+          "package_name": "com.example.mediboundbusiness"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvOQS4Nc3y19ZFx2RGQk9EFhr5tpeRKm0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "46115585123-2h5e3am3nhspil4a3tqkdv0ta9c0dnng.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.medibound.medibound"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46115585123:android:e429319fce853b82578c56",
+        "android_client_info": {
+          "package_name": "com.medibound"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvOQS4Nc3y19ZFx2RGQk9EFhr5tpeRKm0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "46115585123-2h5e3am3nhspil4a3tqkdv0ta9c0dnng.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.medibound.medibound"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
