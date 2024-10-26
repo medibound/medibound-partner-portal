@@ -2,8 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mediboundbusiness/pages/DashboardScreen.dart';
-import 'package:mediboundbusiness/res/Functions.dart';
-import 'package:mediboundbusiness/res/MediboundBuilder.dart';
+import 'package:medibound_library/medibound_library.dart'; // Import the library
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -13,6 +12,8 @@ void main() async {
   await Firebase.initializeApp(
   options: DefaultFirebaseOptions.currentPlatform,
 );
+  await initialize();
+
 
   runApp(DevicePortalApp());
 }

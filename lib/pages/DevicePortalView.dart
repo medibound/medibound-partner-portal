@@ -2,14 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_network/image_network.dart';
-import 'package:mediboundbusiness/helper/fhir/Organization.dart';
-import 'package:mediboundbusiness/helper/fhir/User.dart';
+import 'package:medibound_library/medibound_library.dart';
 import 'package:mediboundbusiness/pages/device-profiles/CreateDeviceProfileForm.dart';
-import 'package:mediboundbusiness/types/OrganizationTypes.dart';
-import 'package:mediboundbusiness/res/MediboundBuilder.dart';
-import 'package:mediboundbusiness/ui/Blurred.dart';
-import 'package:mediboundbusiness/ui/Button.dart';
-import 'package:mediboundbusiness/ui/Titles.dart';
 
 class DevicePortalView extends StatefulWidget {
   final MbUser user;
@@ -55,12 +49,13 @@ class _DevicePortalViewState extends State<DevicePortalView> {
         .where('membersIds', arrayContains: widget.user.id)
         .snapshots();
     await for (var snapshot in snapshots) {
-      List<MbOrganization> organizations = snapshot.docs.map((doc) {
+      List<MbOrganization> organizations = await Future.wait(snapshot.docs.map((doc) async {
         var data = doc.data();
         data['id'] = doc.id;
         print('Organization ID: ${doc.id}'); // Debugging statement
-        return MbOrganization.fromJsonStatic(data);
-      }).toList();
+        var org = await MbOrganization.fromJsonStatic(data);
+        return org;
+      }).toList());
       yield organizations;
     }
   }
@@ -85,13 +80,13 @@ class _DevicePortalViewState extends State<DevicePortalView> {
             var organizations = snapshot.data!;
             var myOrganizations = organizations
                 .where((org) => org.members.any((member) =>
-                    member['userId'] == widget.user.id &&
-                    member['role'] != 'invited'))
+                    member.id == widget.user.id &&
+                    member.role != 'invited'))
                 .toList();
             var myInvitations = organizations
                 .where((org) => org.members.any((member) =>
-                    member['userId'] == widget.user.id &&
-                    member['role'] == 'invited'))
+                    member.id == widget.user.id &&
+                    member.role == 'invited'))
                 .toList();
 
             return Column(

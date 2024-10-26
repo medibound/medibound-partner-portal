@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -5,17 +6,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_network/image_network.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:crop_your_image/crop_your_image.dart';
-import 'package:mediboundbusiness/helper/fhir/Organization.dart';
-import 'package:mediboundbusiness/helper/fhir/User.dart';
-import 'package:mediboundbusiness/types/OrganizationRole.dart';
-import 'package:mediboundbusiness/types/OrganizationTypes.dart';
-import 'package:mediboundbusiness/res/MediboundBuilder.dart';
-import 'package:mediboundbusiness/ui/Input.dart';
-import 'package:mediboundbusiness/ui/Button.dart';
-import 'package:mediboundbusiness/ui/Section.dart';
-import 'package:mediboundbusiness/ui/Titles.dart';
-import 'package:mediboundbusiness/ui/Dropdown.dart';
-import 'package:mediboundbusiness/ui/SuggestedInput.dart';
+import 'package:medibound_library/medibound_library.dart';
+
 
 class ManageOrganizationForm extends StatefulWidget {
   final MbOrganization organization;
@@ -42,7 +34,7 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
   late String? _organizationType;
   late String? _searchParms;
   late String _currentUserRole;
-  late Map<MbUser, String> _users;
+  late Map<String, MbRoledUser> _users;
   bool isLoading = false;
   bool isLoadingUsers = true; // Added loading flag for users
   Uint8List? _imageData;
@@ -64,13 +56,9 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
   }
 
   Future<void> _initializeUser() async {
-    for (var userJSON in widget.organization.members) {
-      if (userJSON['userId'] != null && userJSON['userId']!.isNotEmpty) {
-        var user = await MbUser.getStatic(id: userJSON['userId']!);
-        if (user != null) {
-          _users[user] = userJSON['role']!;
-        }
-      }
+    for (var user in widget.organization.members) {
+      _addUser(user);
+    
     }
     setState(() {
       isLoadingUsers = false; // Set loading flag to false after loading users
@@ -79,30 +67,25 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
 
   String _determineUserRole() {
     for (var member in widget.organization.members) {
-      if (member['userId'] == widget.user.id) {
-        return member['role'] ?? 'member';
+      if (member.id == widget.user.id) {
+        return member.role ?? 'member';
       }
     }
     return 'member';
   }
 
-  void _addUser(MbUser user) {
+  void _addUser(MbRoledUser user) {
     setState(() {
-      _users.addAll({user: 'invited'});
+      _users.addAll({user.id!: user});
     });
   }
 
-  void _removeUser(MbUser user) {
+  void _removeUser(MbRoledUser user) {
     setState(() {
-      _users.remove(user);
+      _users.remove(user.id);
     });
   }
 
-  void _updateUserRole(MbUser user, String role) {
-    setState(() {
-      _users[user] = role;
-    });
-  }
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
@@ -113,9 +96,7 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
       widget.organization.privacyPolicy = _privacyPolicy!;
       widget.organization.address = _address!;
       widget.organization.type = _organizationType!;
-      widget.organization.members = _users.entries
-          .map((entry) => {'userId': entry.key.id!, 'role': entry.value!})
-          .toList();
+      widget.organization.members = _users.entries.map((e) => e.value).toList().cast<MbRoledUser>();
       setState(() {
         isLoading = true;
       });
@@ -130,7 +111,7 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
     }
   }
 
-  Future<List<MbUser>> _fetchUsersSuggestions(
+  Future<List<MbRoledUser>> _fetchUsersSuggestions(
       String query, List<String> excludedValues) async {
     if (query.isEmpty) {
       return [];
@@ -144,13 +125,14 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
         .where('email', isLessThanOrEqualTo: query + '\uf8ff')
         .get();
 
-    List<Future<MbUser>> futureSuggestions = querySnapshot.docs
+    List<Future<MbRoledUser>> futureSuggestions = querySnapshot.docs
         .where((doc) => !excludedValues.contains(doc['id']))
         .map((doc) async {
-      return await MbUser.getStatic(id: doc['id']);
+      var user = await MbUser.getStatic(id: doc['id']);
+      return MbRoledUser(user: user, role: 'invited'); // Assuming default role as 'member'
     }).toList();
 
-    List<MbUser> suggestions = await Future.wait(futureSuggestions);
+    List<MbRoledUser> suggestions = await Future.wait(futureSuggestions);
 
     print('Suggestions fetched: $suggestions');
 
@@ -335,7 +317,7 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
                         shownValue: 'name',
                         initialValue: '',
                         excludedValues: [
-                          ..._users.entries.map((u) => u.key.id!)
+                          ..._users.entries.map((u) => u.key)
                         ],
                         onChanged: (String? value) => _privacyPolicy = value,
                         onSelected: (value) => {},
@@ -360,7 +342,7 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
                                         vertical: 15, horizontal: 10),
                                     child: Row(children: [
                                       ImageNetwork(
-                                        image: entry.key.pictureUrl!,
+                                        image: entry.value.pictureUrl!,
                                         height: 40,
                                         width: 40,
                                         borderRadius: BorderRadius.circular(30),
@@ -371,11 +353,11 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           MbTitle4(
-                                              text: entry.key.givenNames[0] +
+                                              text: entry.value.givenNames[0] +
                                                   " " +
-                                                  entry.key.familyName),
+                                                  entry.value.familyName),
                                           MbSubheading2(
-                                              text: entry.key.email)
+                                              text: entry.value.email)
                                         ],
                                       ),
                                     ]),
@@ -388,27 +370,23 @@ class _ManageOrganizationFormState extends State<ManageOrganizationForm> {
                                     hintText: 'Select Role',
                                     labelText: 'Role',
                                     codes: OrganizationRole.codes,
-                                    initialValue: entry.value,
+                                    initialValue: entry.value.role,
                                     onChanged: (String? value) {
                                       setState(() {
-                                        _updateUserRole(
-                                            entry.key,
-                                            value!);
+                                        entry.value.role = value!;
                                       });
                                     },
                                     onSaved: (String? value) {
-                                      _updateUserRole(
-                                          entry.key,
-                                          value!);
+                                      entry.value.role = value!;
                                     },
-                                    enabled: entry.value != 'invited' &&
-                                        entry.value != 'owner',
+                                    enabled: entry.value.role != 'invited' &&
+                                        entry.value.role != 'owner',
                                   ),
                                 ),
-                                if (_canRemoveUser(entry.value!))
+                                if (_canRemoveUser(entry.value.role!))
                                   IconButton(
                                     icon: Icon(Icons.remove_circle),
-                                    onPressed: () => _removeUser(entry.key),
+                                    onPressed: () => _removeUser(entry.value),
                                   ),
                               ],
                             );

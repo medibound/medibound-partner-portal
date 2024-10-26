@@ -2,15 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_network/image_network.dart';
-import 'package:mediboundbusiness/helper/fhir/Organization.dart';
-import 'package:mediboundbusiness/helper/fhir/User.dart';
+import 'package:medibound_library/medibound_library.dart';
 import 'package:mediboundbusiness/pages/organization/CreateOrganizationForm.dart';
 import 'package:mediboundbusiness/pages/organization/ManageOrganizationForm.dart';
-import 'package:mediboundbusiness/types/OrganizationTypes.dart';
-import 'package:mediboundbusiness/res/MediboundBuilder.dart';
-import 'package:mediboundbusiness/ui/Blurred.dart';
-import 'package:mediboundbusiness/ui/Button.dart';
-import 'package:mediboundbusiness/ui/Titles.dart';
 
 class OrganizationView extends StatefulWidget {
   final MbUser user;
@@ -127,13 +121,13 @@ class _OrganizationViewState extends State<OrganizationView> {
             var organizations = snapshot.data!;
             var myOrganizations = organizations
                 .where((org) => org.members.any((member) =>
-                    member['userId'] == widget.user.id &&
-                    member['role'] != 'invited'))
+                    member.id == widget.user.id &&
+                    member.role != 'invited'))
                 .toList();
             var myInvitations = organizations
                 .where((org) => org.members.any((member) =>
-                    member['userId'] == widget.user.id &&
-                    member['role'] == 'invited'))
+                    member.id == widget.user.id &&
+                    member.role == 'invited'))
                 .toList();
 
             return Column(
@@ -305,8 +299,8 @@ class _OrganizationViewState extends State<OrganizationView> {
           ),
           Spacer(),
           organization.members.any((member) =>
-                  member['userId'] == widget.user.id &&
-                  (member['role'] == 'admin' || member['role'] == 'owner'))
+                  member.id == widget.user.id &&
+                  (member.role == 'admin' || member.role == 'owner'))
               ? MbOutlinedButton(
                   text: "Manage",
                   padding: EdgeInsets.symmetric(horizontal: 20),
@@ -376,13 +370,10 @@ class _OrganizationViewState extends State<OrganizationView> {
               setState(() {
                 _loadingMap[organization.id! + "accept"] = true;
               });
-              List<Map<String, String>> updatedMembers =
+              List<MbRoledUser> updatedMembers =
                   organization.members!.map((member) {
-                if (member['userId'] == widget.user.id) {
-                  return {
-                    'userId': widget.user.id!,
-                    'role': 'member'
-                  }; // Update the role from 'invited' to 'member'
+                if (member.id == widget.user.id) {
+                  return MbRoledUser(user: widget.user, role: 'member'); 
                 }
                 
                 return member;
@@ -407,8 +398,8 @@ class _OrganizationViewState extends State<OrganizationView> {
               setState(() {
                 _loadingMap[organization.id! + "deny"] = true;
               });
-              List<Map<String, String>> updatedMembers = organization.members
-                  .where((member) => member['userId'] != widget.user.id)
+              List<MbRoledUser> updatedMembers = organization.members
+                  .where((member) => member.id != widget.user.id)
                   .toList();
               await organization
                   .update(

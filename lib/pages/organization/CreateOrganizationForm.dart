@@ -5,16 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:crop_your_image/crop_your_image.dart';
-import 'package:mediboundbusiness/helper/fhir/Organization.dart';
-import 'package:mediboundbusiness/types/OrganizationTypes.dart';
-import 'package:mediboundbusiness/res/MediboundBuilder.dart';
-import 'package:mediboundbusiness/ui/Input.dart';
-import 'package:mediboundbusiness/ui/Button.dart';
-import 'package:mediboundbusiness/ui/Section.dart';
-import 'package:mediboundbusiness/helper/fhir/User.dart';
-import 'package:mediboundbusiness/ui/SuggestedInput.dart';
-import 'package:mediboundbusiness/ui/Titles.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:medibound_library/medibound_library.dart';
 
 class CreateOrganizationForm extends StatefulWidget {
   final VoidCallback onSubmit;
@@ -38,23 +30,18 @@ class _CreateOrganizationFormState extends State<CreateOrganizationForm> {
   String? _privacyPolicy;
   String? _website;
   String? _address;
-  List<Map<String, String>> _users = [];
+  List<MbRoledUser> _users = [];
   bool isLoading = false;
   final CropController _cropController = CropController();
-
-
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      var users = _users.where((member) => member['userId']!.isNotEmpty).toList();
+      var users = _users.where((member) => member.id!.isNotEmpty).toList();
 
       // Build the members array
-      List<Map<String, String>> members = [
-        {
-          'userId': widget.user.id!,
-          'role': 'owner',
-        },
+      List<MbRoledUser> members = [
+        MbRoledUser(user: widget.user, role: 'owner'),
         ...users,
       ];
 
@@ -197,8 +184,7 @@ class _CreateOrganizationFormState extends State<CreateOrganizationForm> {
                                         codes: OrganizationType.codes,
                                         onChanged: (value) {
                                           setState(() {
-                                            _organizationType =
-                                                value;
+                                            _organizationType = value;
                                           });
                                         },
                                         required: true,

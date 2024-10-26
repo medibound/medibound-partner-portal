@@ -4,15 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mediboundbusiness/types/DataUITypes.dart';
-import 'package:mediboundbusiness/types/DeviceVariableNumberType.dart';
-import 'package:mediboundbusiness/res/MediboundBuilder.dart';
-import 'package:mediboundbusiness/ui/Blurred.dart';
-import 'package:mediboundbusiness/ui/Button.dart';
-import 'package:mediboundbusiness/ui/Input.dart';
-import 'package:mediboundbusiness/ui/Dropdown.dart';
-import 'package:mediboundbusiness/types/DeviceVariableType.dart';
-import 'package:mediboundbusiness/types/UnitType.dart';
+import 'package:medibound_library/medibound_library.dart';
 
 class VariableDialog extends StatefulWidget {
   final Map<String, dynamic> variable;

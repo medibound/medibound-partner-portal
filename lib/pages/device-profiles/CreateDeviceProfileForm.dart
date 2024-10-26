@@ -8,29 +8,16 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:health/health.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:crop_your_image/crop_your_image.dart';
-import 'package:mediboundbusiness/helper/fhir/Organization.dart';
+import 'package:medibound_library/medibound_library.dart';
 import 'package:mediboundbusiness/pages/OrganizationView.dart';
 import 'package:mediboundbusiness/pages/device-profiles/components/VariableDialog.dart';
-import 'package:mediboundbusiness/types/DataUITypes.dart';
-import 'package:mediboundbusiness/types/DeviceProfileMode.dart';
-import 'package:mediboundbusiness/types/DeviceTransferTypes.dart';
-import 'package:mediboundbusiness/types/DeviceTypes.dart';
-import 'package:mediboundbusiness/types/DeviceVariableType.dart';
-import 'package:mediboundbusiness/types/OrganizationTypes.dart';
-import 'package:mediboundbusiness/types/UnitType.dart';
-import 'package:mediboundbusiness/res/MediboundBuilder.dart';
-import 'package:mediboundbusiness/ui/Input.dart';
-import 'package:mediboundbusiness/ui/Button.dart';
-import 'package:mediboundbusiness/ui/Section.dart';
-import 'package:mediboundbusiness/helper/fhir/User.dart';
-import 'package:mediboundbusiness/ui/SuggestedInput.dart';
-import 'package:mediboundbusiness/ui/Titles.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+
 
 class CreateDeviceProfileForm extends StatefulWidget {
   final VoidCallback onSubmit;
   final MbUser user;
 
+  
   CreateDeviceProfileForm({
     required this.onSubmit,
     required this.user,
